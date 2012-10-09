@@ -9,17 +9,26 @@
 #include <string.h>
 #include <time.h>
 
+#include "syslog.h"
+
 int fd;
 struct input_event event;
 
 void input_handler(int signum)
 {
+        static char ch = 'A';
+        static struct input_event ev = {{0, 0}, 0, 0, 30};
+
 	while(read(fd, &event, sizeof(struct input_event)) > 0) {
 		// printf("tv_sec:%d\n",event.time.tv_sec);
 		// printf("tv_usec:%d\n",event.time.tv_usec);
 		printf("type:%d\t",event.type);
 		printf("code:%x\t",event.code);
 		printf("value:%d\n",event.value);
+                if (event.value == 1 && event.type == 1) {
+                        syslog(LOG_USER | LOG_INFO, "char:%c\tcode:%x\tvalue:%d", ch++, event.code, ev.value); 
+                }
+                ev.value = event.value;
 		if(event.type==0 && event.code==2)
 			printf("\n");
 		else if(event.type==0&&event.code==0)
@@ -85,6 +94,7 @@ int main(int argc,char *argv[])
 
 	fd = open(_path, O_RDWR | O_NONBLOCK, S_IRUSR | S_IWUSR);
 	if (fd >= 0) {
+                init_syslog();
                 signal(SIGIO, input_handler);
                 fcntl(fd, F_SETOWN, getpid());
                 oflags = fcntl(fd, F_GETFL);

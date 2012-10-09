@@ -8,19 +8,20 @@
 #include <unistd.h>
 #include "syslog.h"
 
-#define _DEBUG_LEVEL            "DEBUG_LEVEL"
+#define LOG_FILE_MAX_SIZE       (4 << 20) /* 4M */
+#define DEBUG_LEVEL             6
 
 int init_syslog()
 {
         int fd;
 	if(access(LOG_FILE,F_OK | R_OK | W_OK)) {
-		if(-1 == (fd = creat(LOG_FILE,0777))) {
+		if((fd = creat(LOG_FILE,0777)) < 0) {
 			return -1;
 		} else {
                         close(fd);
                 }
 	} else {
-		return truncate(LOG_FILE,0);
+		return truncate(LOG_FILE, 0);
         }
 
 	return 0;
@@ -30,21 +31,30 @@ int syslog(int priority, const char *_format,...)
 {
 	int pri = priority & 0x00000007;
 	int fac = priority & 0x00000078;
-        int DebugLevel = 6;
 	
-        if(DebugLevel < pri) return 0;
+        if(DEBUG_LEVEL < pri) return 0;
 	
         time_t timestamp;
 	char _timestamp[21] = {0};	
 	time(&timestamp);
 	struct tm * _tm = localtime(&timestamp);
+		
+        FILE *_fp = fopen(LOG_FILE,"a+");
+        long length;
+
+        if (!_fp) return -1;
+        if (fseek(_fp, 0, SEEK_END)) return -1;
+        if ((length = ftell(_fp)) >= LOG_FILE_MAX_SIZE) {
+                if (truncate(LOG_FILE, 0) || fseek(_fp, 0, SEEK_SET)) {
+                        fclose(_fp);
+                        return -1;
+                }
+                syslog(LOG_USER | LOG_WARNING, "The log file(size:%ld) is larger than the LOG_FILE_MAX_SIZE(%ld) !",
+                        length, LOG_FILE_MAX_SIZE); 
+        }
 	sprintf(_timestamp, "%04d-%02d-%02d %02d:%02d:%02d",
                 _tm->tm_year+1900, _tm->tm_mon+1, _tm->tm_mday,
                 _tm->tm_hour, _tm->tm_min, _tm->tm_sec);
-		
-        FILE *_fp = fopen(LOG_FILE,"a+");
-        if(!_fp) return -1;
-        
         fprintf(_fp, "%s ", _timestamp);
 			
         switch(fac) {
