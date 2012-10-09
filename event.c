@@ -7,6 +7,7 @@
 #include <linux/input.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 int fd;
 struct input_event event;
@@ -27,28 +28,81 @@ void input_handler(int signum)
 	return ;
 }
 
+int send_event(int fd)
+{
+        struct input_event ev;
+
+        ev.type = 4;
+        ev.code = 4;
+        ev.value = 30;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        ev.type = 1;
+        ev.code = 0x1e;
+        ev.value = 1;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        ev.type = 0;
+        ev.code = 0;
+        ev.value = 0;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        ev.type = 4;
+        ev.code = 4;
+        ev.value = 30;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        ev.type = 1;
+        ev.code = 0x1e;
+        ev.value = 0;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        ev.type = 0;
+        ev.code = 0;
+        ev.value = 0;
+        if (sizeof(ev) != write(fd, &ev, sizeof(ev))) {
+                perror("fail to write event");
+                return -1;
+        }
+        return 0;
+}
+
 int main(int argc,char *argv[])
 {
 	char *_path = "/dev/input/event3"; 
 	int oflags;
-	if(argc == 2 && argv[1]!=NULL) _path = argv[1];
+	if(argc == 2 && argv[1]) _path = argv[1];
 
 	fd = open(_path, O_RDWR | O_NONBLOCK, S_IRUSR | S_IWUSR);
 	if (fd >= 0) {
-		signal(SIGIO, input_handler);
-		fcntl(fd, F_SETOWN, getpid());
-		oflags = fcntl(fd, F_GETFL);
-		fcntl(fd, F_SETFL, oflags | FASYNC);
-		while(1) {
-			if( getchar() == 'q') {
-				printf("Quit!");
-				break;	
-			}
-		}
+                signal(SIGIO, input_handler);
+                fcntl(fd, F_SETOWN, getpid());
+                oflags = fcntl(fd, F_GETFL);
+                fcntl(fd, F_SETFL, oflags | FASYNC);
+                //printf("start to do send_event\n");
+                while(1) {
+                        if(getchar() == 'q') {
+                                printf("Quit!");
+                                break;	
+                        }
+                }
+                //send_event(fd);
+                //printf("end to do send_event\n");
                 close(fd);
 	} else {
-		printf("device open failure\n");
+		perror("device open failure");
 	}
+        printf("\nThe end\n");
 
 	return 0;
 }
