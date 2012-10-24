@@ -7,7 +7,7 @@ OBJ = event.o syslog.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-input: $(OBJ)
+joypad: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 .PHONY: clean
