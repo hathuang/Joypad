@@ -3,6 +3,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+	log.c \
+	io.c \
 	main.c
 
 LOCAL_LDLIBS += -lz

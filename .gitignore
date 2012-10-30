@@ -8,10 +8,14 @@
 
 
 # mobile DIR.
+
 mobile/libs
 mobile/obj
+mobile/jni/*.swp
+
 
 # pc DIR.
+
 pc/*~
 pc/*.swp
 pc/*.log

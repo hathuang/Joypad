@@ -86,6 +86,7 @@ int send_event(int fd)
         return 0;
 }
 
+/*
 int main(int argc,char *argv[])
 {
 	char *_path = "/dev/input/event3"; 
@@ -116,3 +117,4 @@ int main(int argc,char *argv[])
 
 	return 0;
 }
+*/
