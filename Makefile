@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS =-I. -Wall -O2
 #CFLAGS +=-DDebug -g
-DEPS = syslog.h
-OBJ = event.o syslog.o
+DEPS = log.h
+OBJ = event.o log.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

@@ -6,12 +6,13 @@
 #include <stdarg.h>
 #include <time.h>
 #include <unistd.h>
-#include "syslog.h"
+
+#include "log.h"
 
 #define LOG_FILE_MAX_SIZE       (4 << 20) /* 4M */
 #define DEBUG_LEVEL             6
 
-int init_syslog()
+int init_log()
 {
         int fd;
 	if(access(LOG_FILE,F_OK | R_OK | W_OK)) {
@@ -27,10 +28,10 @@ int init_syslog()
 	return 0;
 }
 
-int syslog(int priority, const char *_format,...)
+int syslog(int priority, const char *_format, ...)
 {
-	int pri = priority & 0x00000007;
-	int fac = priority & 0x00000078;
+	int pri = priority & 0x07;
+	int fac = priority & 0x78;
 	
         if(DEBUG_LEVEL < pri) return 0;
 	
@@ -49,7 +50,8 @@ int syslog(int priority, const char *_format,...)
                         fclose(_fp);
                         return -1;
                 }
-                syslog(LOG_USER | LOG_WARNING, "The log file(size:%ld) is larger than the LOG_FILE_MAX_SIZE(%ld) !",
+                syslog(LOG_USER | LOG_WARNING,
+                        "The log file(size:%ld) is larger than the LOG_FILE_MAX_SIZE(%ld) !",
                         length, LOG_FILE_MAX_SIZE); 
         }
 	sprintf(_timestamp, "%04d-%02d-%02d %02d:%02d:%02d",

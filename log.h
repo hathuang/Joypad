@@ -21,8 +21,8 @@
 #define LOG_DEVICE		(0x03 << 4)	/**< device or pc output by expect */
 #define LOG_EXPECT		(0x04 << 4)	/**< EXPECT log */
 #define LOG_RESULT		(0x05 << 4)	/**< output */
-#define LOG_IMPORTANT	        (0x10 << 4)	/**< output to syslog */
+#define LOG_IMPORTANT	        (0x10 << 4)	/**< output to log */
 #define LOG_FILE                "./log.txt"
-extern int init_syslog();
-extern int syslog(int priority, const char * _format,...);
+extern int init_log();
+extern int syslog(int priority, const char *_format, ...);
 #endif

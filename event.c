@@ -9,7 +9,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "syslog.h"
+#include "log.h"
 
 int fd;
 struct input_event event;
@@ -94,7 +94,7 @@ int main(int argc,char *argv[])
 
 	fd = open(_path, O_RDWR | O_NONBLOCK, S_IRUSR | S_IWUSR);
 	if (fd >= 0) {
-                init_syslog();
+                init_log();
                 signal(SIGIO, input_handler);
                 fcntl(fd, F_SETOWN, getpid());
                 oflags = fcntl(fd, F_GETFL);
