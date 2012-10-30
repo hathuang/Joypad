@@ -6,9 +6,15 @@
 # Normal rules
 #
 
-*~
-*.swp
-joypad
-*.log
-*.txt
-*.o
+
+# mobile DIR.
+mobile/libs
+mobile/obj
+
+# pc DIR.
+pc/*~
+pc/*.swp
+pc/*.log
+pc/*.txt
+pc/*.o
+pc/joypad
