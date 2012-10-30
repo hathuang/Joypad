@@ -120,17 +120,31 @@ int do_cmd(int fd, const char *cmd, const char *arg)
 
         if (fd < 0 || !cmd) return -1;
 
-        cmd_no = UNKOWN;
         arg_size = MSG2INT(cmd+CMD_SIZE);
+        if (arg_size > sizeof(msg)-1) {
+                fprintf(stderr, "ugly size of arg %d bytes !", arg_size);
+                return -1;
+        }
+        if (arg_size && (ret = readx(fd, msg, arg_size)) != arg_size) {
+                fprintf(stderr, "fail to get enough size %d/%d bytes.", ret, arg_size);
+                return -1;
+        }
+        cmd_no = UNKOWN;
         if (!strncmp(cmd, CMD_OKAY, CMD_SIZE)) {
                 cmd_no = OKAY;
-                // TODO
+                if (arg_size) {
+                        msg[arg_size] = 0;
+                        fprintf(stderr, "okay msg : %s.", msg);
+                }
         } else if (!strncmp(cmd, CMD_BUSY, CMD_SIZE)) {
                 cmd_no = BUSY;
                 // TODO
         } else if (!strncmp(cmd, CMD_CNTL, CMD_SIZE)) {
                 cmd_no = CNTL;
-                // TODO
+                if (arg_size) {
+                        msg[arg_size] = 0;
+                        fprintf(stderr, "cntl msg : %s.", msg);
+                }
         } else if (!strncmp(cmd, CMD_SYNC, CMD_SIZE)) {
                 cmd_no = SYNC;
                 // TODO
@@ -139,11 +153,7 @@ int do_cmd(int fd, const char *cmd, const char *arg)
                 // TODO
         } else if (!strncmp(cmd, CMD_FAIL, CMD_SIZE)) {
                 cmd_no = FAIL;
-                if (arg_size > sizeof(msg)-1 || arg_size == 0) {
-                        fprintf(stderr, "ugly size of arg !");
-                } else if ((ret = readx(fd, msg, arg_size)) != arg_size) {
-                        fprintf(stderr, "fail to get enough size %d/%d bytes.", ret, arg_size);
-                } else {
+                if (arg_size) {
                         msg[arg_size] = 0;
                         fprintf(stderr, "fail msg : %s.", msg);
                 }
